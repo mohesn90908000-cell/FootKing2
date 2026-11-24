@@ -1,0 +1,49 @@
+
+name: Build FootKing APK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'FootKing-Cloud-Build-Ready-Stage*.zip'
+      - '.github/workflows/build-footking.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Extract source
+        run: |
+          ARCHIVE=$(find . -maxdepth 1 -name 'FootKing-Cloud-Build-Ready-Stage*.zip' -print -quit)
+          test -n "$ARCHIVE"
+          unzip -q "$ARCHIVE" -d source
+          test -f source/FootKing/settings.gradle.kts
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK
+        run: sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Build APK
+        run: gradle --no-daemon --stacktrace -p source/FootKing :app:assembleDebug
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: FootKing-APK
+          path: source/FootKing/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          
