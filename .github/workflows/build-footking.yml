@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
   push:
     paths:
-      - 'FootKing-Cloud-Build-Ready-Fixed-v2.zip'
+      - 'FootKing-Cloud-Build-Ready-Fixed-1.zip
       - '.github/workflows/build-footking.yml'
 
 permissions:
